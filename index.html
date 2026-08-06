@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Track</title>
+    <meta name="theme-color" content="#4CAF50">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Food Track">
+    <link rel="apple-touch-icon" href="FoodTrackIcon.png">
+    <link rel="icon" type="image/png" href="FoodTrackIcon3D.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body dir="rtl">
+    <h1 dir="ltr" class="app-title"><img src="FoodTrackIcon3D.png" alt="Food Track icon" class="app-title-icon">Food Track</h1>
+
+    <div class="container">
+        <!-- Calendar View -->
+        <section id="calendar-view">
+            <div class="calendar-header">
+                <span id="calendar-month-label"></span>
+                <div class="calendar-nav">
+                    <button id="prev-month-button" type="button">הקודם ←</button>
+                    <button id="today-button" type="button">היום</button>
+                    <button id="next-month-button" type="button">הבא →</button>
+                </div>
+            </div>
+            <div id="calendar-month">
+                <!-- Calendar days will be injected here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Add-entry form stays on main page (visible) -->
+        <section id="food-entry-section">
+            <form id="food-entry-form">
+                <p class="form-note"><span class="required-marker">*</span> שדות חובה</p>
+                <label for="foodNameSelect">מזון: <span class="required-marker">*</span></label>
+                <select id="foodNameSelect" required>
+                    <option value="">בחר מזון קיים או הוסף חדש</option>
+                    <option value="__new">הוסף מזון חדש...</option>
+                </select>
+                <input type="text" id="foodNameCustom" placeholder="הקלד שם מזון חדש" class="hidden"><br><br>
+
+                <label for="foodTypeSelect">סוג מזון: <span class="required-marker">*</span></label>
+                <select id="foodTypeSelect" required>
+                    <option value="">בחר סוג מזון קיים או הוסף חדש</option>
+                    <option value="__new">הוסף סוג מזון חדש...</option>
+                </select>
+                <input type="text" id="foodTypeCustom" placeholder="הקלד סוג מזון חדש" class="hidden"><br><br>
+
+                <label for="quantity">כמות: <span class="required-marker">*</span></label>
+                <input type="number" id="quantity" min="0.1" step="any" required><br><br>
+
+                <label for="unitSelect">יחידה: <span class="required-marker">*</span></label>
+                <select id="unitSelect" required>
+                    <option value="">בחר יחידה קיימת או הוסף חדשה</option>
+                    <option value="__new">הוסף יחידה חדשה...</option>
+                </select>
+                <input type="text" id="unitCustom" placeholder="הקלד יחידה חדשה" class="hidden"><br><br>
+
+                <label for="calories">קלוריות (אופציונלי):</label>
+                <input type="number" id="calories" min="0" step="any" placeholder="קלוריות">
+
+                <button id="add-food-button" type="submit">הוסף רשומה</button>
+                <button id="cancel-edit-button" type="button" class="hidden secondary-button">ביטול עריכה</button>
+            </form>
+        </section>
+
+        <!-- Food Logging Modal (only shows the daily log) -->
+        <section id="food-logging-panel">
+            <div class="food-log-modal">
+                <button id="close-log-overlay" class="close-button" aria-label="סגור">×</button>
+                <h2 id="selected-date-header"></h2>
+                <p id="daily-calories-summary" class="calories-summary"></p>
+
+                <!-- Display area for today's logged foods -->
+                <h3>יומן אוכל</h3>
+                <ul id="daily-log-list">
+                    <!-- Daily entries will be displayed here -->
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; Food Track</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

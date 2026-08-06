@@ -1,0 +1,373 @@
+/* General reset and mobile first styling */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    direction: rtl;
+    text-align: right;
+    background-color: #f4f7f9;
+    color: #333;
+    padding-bottom: 60px; /* Space for footer */
+}
+
+.container {
+    max-width: 1200px; /* Limit overall width on larger screens */
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+h1 {
+    color: #4CAF50; /* Green color for food theme */
+    margin-bottom: 20px;
+}
+
+.app-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: max-content;
+    margin: 0 auto 20px;
+}
+
+.app-title-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+/* --- Sections & Layout -- */
+#calendar-view, #food-logging-panel {
+    padding: 20px 0;
+}
+
+#calendar-view {
+    overflow-x: auto;
+}
+
+#food-logging-panel {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+#food-logging-panel.visible {
+    display: flex !important;
+}
+
+.calories-summary {
+    margin: 0 0 10px 0;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.food-log-modal {
+    width: 100%;
+    max-width: 420px;
+    max-height: 92vh;
+    overflow-y: auto;
+    background-color: #fff;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    direction: rtl;
+    text-align: right;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    color: #b71c1c;
+    font-size: 1.5rem;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-button:hover {
+    background: #fff;
+}
+
+.hidden { 
+    display: none !important; 
+}
+
+/* --- Calendar Specific Styling -- */
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.calendar-nav button {
+    border: 1px solid #388E3C;
+    background-color: #fff;
+    color: #388E3C;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.calendar-nav button:hover {
+    background-color: #388E3C;
+    color: white;
+}
+
+#calendar-month-label {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #333;
+    text-align: right;
+    direction: rtl;
+}
+
+#calendar-month {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    text-align: center;
+    min-width: 320px;
+}
+
+h2 {
+    color: #388E3C;
+    margin-bottom: 0;
+}
+
+.day-header {
+    font-weight: bold;
+    padding: 5px 0;
+}
+
+.calendar-day {
+    cursor: pointer;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    padding: 10px 0;
+    font-size: 16px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.calendar-day:hover {
+    background-color: #e8f5e9; /* Light green hover */
+    transform: translateY(-1px);
+} 
+
+/* Active day styling */
+.calendar-day.active { 
+    background-color: #66BB6A; 
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Indicator for days that already have logged entries */
+.calendar-day.has-entries {
+    position: relative;
+}
+.calendar-day.has-entries::after {
+    content: '';
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff9800; /* orange dot */
+    box-shadow: 0 0 0 3px rgba(255,152,0,0.08);
+}
+
+/* --- Form Styling -- */
+#food-entry-form label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #388E3C;
+    text-align: right;
+}
+
+.form-note {
+    margin-bottom: 6px;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.required-marker {
+    color: #d32f2f;
+    font-weight: bold;
+    margin-left: 6px;
+}
+
+#food-entry-form input[type="text"],
+#food-entry-form input[type="number"],
+#food-entry-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#add-food-button {
+    background-color: #4CAF50; 
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+#add-food-button:hover {
+    background-color: #459d4a;
+}
+
+/* --- Daily Log List Styling -- */
+#daily-log-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+#daily-log-list li {
+    background-color: transparent;
+    border: none;
+    padding: 10px 0;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #e5e5e5;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.log-entry-text {
+    font-size: 0.96rem;
+    color: #222;
+    line-height: 1.4;
+    word-break: break-word;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.delete-entry,
+.edit-entry {
+    border: none;
+    background-color: #ff5252;
+    color: white;
+    padding: 8px 10px;
+    border-radius: 999px;
+    font-size: 0.96rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+    min-width: 38px;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.edit-entry {
+    background-color: #2196F3;
+}
+
+.delete-entry .delete-icon,
+.edit-entry .edit-icon {
+    display: inline-block;
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+.secondary-button {
+    background-color: #f0f0f0;
+    color: #333;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    padding: 10px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+    font-size: 15px;
+}
+
+.secondary-button:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-1px);
+}
+
+.secondary-button:active {
+    transform: scale(0.98);
+}
+
+.delete-entry:hover {
+    background-color: #e53935;
+    transform: translateY(-1px);
+}
+
+.delete-entry:active,
+.edit-entry:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 480px) {
+    #calendar-month {
+        min-width: 100%;
+        grid-template-columns: repeat(7, minmax(40px, 1fr));
+    }
+
+    .delete-entry {
+        width: auto;
+    }
+}
+
+/* --- Footer & Utility -- */
+footer {
+    text-align: center;
+    padding: 10px;
+    color: #777;
+    font-size: 0.9em;
+}
