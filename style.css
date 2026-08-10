@@ -9,44 +9,45 @@ body {
     font-family: 'Arial', sans-serif;
     direction: rtl;
     text-align: right;
-    background-color: #f4f7f9;
-    color: #333;
-    padding-bottom: 60px; /* Space for footer */
+    background: linear-gradient(180deg, #faf7ff 0%, #f2ecff 100%);
+    color: #362d4d;
+    padding-bottom: 32px;
 }
 
 .container {
-    max-width: 1200px; /* Limit overall width on larger screens */
-    margin: 20px auto;
-    padding: 20px;
+    max-width: 1200px;
+    margin: 12px auto 0;
+    padding: 14px 14px 10px;
     background-color: #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    box-shadow: 0 12px 30px rgba(125, 102, 176, 0.08);
+    border-radius: 18px;
 }
 
 h1 {
-    color: #4CAF50; /* Green color for food theme */
-    margin-bottom: 20px;
+    color: #9a84d9;
+    margin-bottom: 12px;
 }
 
 .app-title {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     width: max-content;
-    margin: 0 auto 20px;
+    margin: 0 auto 12px;
+    font-size: 1.6rem;
 }
 
 .app-title-icon {
-    width: 38px;
-    height: 38px;
+    width: 30px;
+    height: 30px;
     border-radius: 10px;
     object-fit: cover;
 }
 
 /* --- Sections & Layout -- */
 #calendar-view, #food-logging-panel {
-    padding: 20px 0;
+    padding: 10px 0;
 }
 
 #calendar-view {
@@ -55,16 +56,15 @@ h1 {
 
 #food-logging-panel {
     position: fixed;
-    left: 0;
-    top: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(54, 45, 77, 0.28);
     z-index: 999;
     display: none;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
-    padding: 20px;
+    padding: 0;
 }
 
 #food-logging-panel.visible {
@@ -79,24 +79,33 @@ h1 {
 
 .food-log-modal {
     width: 100%;
-    max-width: 420px;
-    max-height: 92vh;
+    max-width: 500px;
+    max-height: 72vh;
     overflow-y: auto;
     background-color: #fff;
-    border-radius: 18px;
-    padding: 20px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    border-radius: 24px 24px 0 0;
+    padding: 10px 16px 16px;
+    box-shadow: 0 -10px 30px rgba(125, 102, 176, 0.18);
     direction: rtl;
     text-align: right;
     position: relative;
 }
 
+.sheet-handle {
+    width: 52px;
+    height: 4px;
+    background: #efe7ff;
+    border-radius: 999px;
+    display: block;
+    margin: 0 auto 10px;
+}
+
 .close-button {
     position: absolute;
-    top: 14px;
-    left: 14px;
+    top: 18px;
+    left: 18px;
     background: rgba(255, 255, 255, 0.95);
-    border: none;
+    border: 1px solid #e0e0e0;
     color: #b71c1c;
     font-size: 1.5rem;
     width: 38px;
@@ -121,28 +130,29 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 15px;
-    margin-bottom: 15px;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .calendar-nav {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
 }
 
 .calendar-nav button {
-    border: 1px solid #388E3C;
+    border: 1px solid #b39ae8;
     background-color: #fff;
-    color: #388E3C;
-    padding: 8px 12px;
-    border-radius: 5px;
+    color: #7a67ca;
+    padding: 6px 10px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
+    font-size: 0.9rem;
 }
 
 .calendar-nav button:hover {
-    background-color: #388E3C;
+    background-color: #b39ae8;
     color: white;
 }
 
@@ -163,36 +173,38 @@ h1 {
 }
 
 h2 {
-    color: #388E3C;
+    color: #7a67ca;
     margin-bottom: 0;
 }
 
 .day-header {
     font-weight: bold;
-    padding: 5px 0;
+    padding: 4px 0;
+    font-size: 0.82rem;
 }
 
 .calendar-day {
     cursor: pointer;
     background-color: #ffffff;
     border: 1px solid #ddd;
-    padding: 10px 0;
-    font-size: 16px;
+    padding: 8px 0;
+    font-size: 15px;
+    min-height: 42px;
     transition: background-color 0.2s, transform 0.1s;
 }
 
 .calendar-day:hover {
-    background-color: #e8f5e9; /* Light green hover */
+    background-color: #f1ebff; /* Light purple hover */
     transform: translateY(-1px);
 } 
 
 /* Active day styling */
 .calendar-day.active { 
-    background-color: #66BB6A; 
+    background-color: #b39ae8; 
     color: white;
     font-weight: bold;
     border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(125, 102, 176, 0.16);
 }
 
 /* Indicator for days that already have logged entries */
@@ -207,24 +219,25 @@ h2 {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #ff9800; /* orange dot */
-    box-shadow: 0 0 0 3px rgba(255,152,0,0.08);
+    background: #dacdff; /* soft accent dot */
+    box-shadow: 0 0 0 3px rgba(179,154,232,0.12);
 }
 
 /* --- Form Styling -- */
 #food-entry-form label {
     display: block;
-    margin-top: 15px;
-    margin-bottom: 5px;
+    margin-top: 10px;
+    margin-bottom: 4px;
     font-weight: bold;
-    color: #388E3C;
+    color: #7a67ca;
     text-align: right;
+    font-size: 0.95rem;
 }
 
 .form-note {
     margin-bottom: 6px;
     color: #666;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .required-marker {
@@ -237,11 +250,12 @@ h2 {
 #food-entry-form input[type="number"],
 #food-entry-form select {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border: 1px solid #e4d9ff;
+    border-radius: 10px;
+    font-size: 15px;
+    background: #fff;
 }
 
 .hidden {
@@ -249,37 +263,38 @@ h2 {
 }
 
 #add-food-button {
-    background-color: #4CAF50; 
+    background: linear-gradient(180deg, #b39ae8 0%, #9a84d9 100%);
     color: white;
-    padding: 12px 20px;
+    padding: 11px 18px;
     border: none;
-    border-radius: 5px;
+    border-radius: 12px;
     cursor: pointer;
-    margin-top: 20px;
-    font-size: 16px;
+    margin-top: 14px;
+    font-size: 15px;
     transition: background-color 0.3s;
+    box-shadow: 0 8px 18px rgba(179,154,232,0.28);
 }
 
 #add-food-button:hover {
-    background-color: #459d4a;
+    background: linear-gradient(180deg, #a98fe3 0%, #8e79d0 100%);
 }
 
 /* --- Daily Log List Styling -- */
 #daily-log-list {
     list-style: none;
     padding: 0;
-    margin-top: 20px;
+    margin-top: 12px;
 }
 
 #daily-log-list li {
     background-color: transparent;
     border: none;
-    padding: 10px 0;
-    margin-bottom: 8px;
+    padding: 8px 0;
+    margin-bottom: 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     border-bottom: 1px solid #e5e5e5;
     flex-wrap: wrap;
     width: 100%;
@@ -312,7 +327,7 @@ h2 {
 }
 
 .edit-entry {
-    background-color: #2196F3;
+    background-color: #9a84d9;
 }
 
 .delete-entry .delete-icon,

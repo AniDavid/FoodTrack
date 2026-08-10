@@ -34,7 +34,6 @@
         <!-- Add-entry form stays on main page (visible) -->
         <section id="food-entry-section">
             <form id="food-entry-form">
-                <p class="form-note"><span class="required-marker">*</span> שדות חובה</p>
                 <label for="foodNameSelect">מזון: <span class="required-marker">*</span></label>
                 <select id="foodNameSelect" required>
                     <option value="">בחר מזון קיים או הוסף חדש</option>
@@ -70,6 +69,7 @@
         <!-- Food Logging Modal (only shows the daily log) -->
         <section id="food-logging-panel">
             <div class="food-log-modal">
+                <div class="sheet-handle"></div>
                 <button id="close-log-overlay" class="close-button" aria-label="סגור">×</button>
                 <h2 id="selected-date-header"></h2>
                 <p id="daily-calories-summary" class="calories-summary"></p>
