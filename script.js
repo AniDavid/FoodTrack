@@ -66,32 +66,70 @@ const saveFoodData = (data) => {
 const loadOptionData = () => {
     try {
         const dataString = localStorage.getItem('foodTrackerOptions');
-        if (dataString) {
-            return JSON.parse(dataString);
-        }
+        const baseOptions = dataString ? JSON.parse(dataString) : { foodNames: [], foodTypes: [], units: [], associations: {} };
+
+        const options = {
+            foodNames: Array.isArray(baseOptions.foodNames) ? baseOptions.foodNames : [],
+            foodTypes: Array.isArray(baseOptions.foodTypes) ? baseOptions.foodTypes : [],
+            units: Array.isArray(baseOptions.units) ? baseOptions.units : [],
+            associations: baseOptions.associations && typeof baseOptions.associations === 'object' ? baseOptions.associations : {}
+        };
 
         const foodData = loadFoodData();
-        const options = { foodNames: [], foodTypes: [], units: [] };
-
         Object.values(foodData).flat().forEach(entry => {
-            addUniqueOption(options.foodNames, entry.foodName);
-            addUniqueOption(options.foodTypes, entry.foodType);
-            addUniqueOption(options.units, entry.unit);
+            const foodName = (entry.foodName || '').trim();
+            const foodType = (entry.foodType || '').trim();
+            const unit = (entry.unit || '').trim();
+
+            addUniqueOption(options.foodNames, foodName);
+            addUniqueOption(options.foodTypes, foodType);
+            addUniqueOption(options.units, unit);
+
+            if (foodName && foodType && unit) {
+                options.associations[foodName] = { type: foodType, unit };
+            }
         });
 
         return options;
     } catch (e) {
         console.error("Error loading dropdown options:", e);
-        return { foodNames: [], foodTypes: [], units: [] };
+        return { foodNames: [], foodTypes: [], units: [], associations: {} };
     }
 };
 
 const saveOptionData = (data) => {
     try {
-        localStorage.setItem('foodTrackerOptions', JSON.stringify(data));
+        const dataToSave = {
+            foodNames: Array.isArray(data.foodNames) ? data.foodNames : [],
+            foodTypes: Array.isArray(data.foodTypes) ? data.foodTypes : [],
+            units: Array.isArray(data.units) ? data.units : [],
+            associations: data.associations && typeof data.associations === 'object' ? data.associations : {}
+        };
+        localStorage.setItem('foodTrackerOptions', JSON.stringify(dataToSave));
     } catch (e) {
         console.error("Error saving dropdown options to local storage:", e);
     }
+};
+
+const rememberFoodAssociation = (foodName, foodType, unit) => {
+    const normalizedFoodName = (foodName || '').trim();
+    const normalizedFoodType = (foodType || '').trim();
+    const normalizedUnit = (unit || '').trim();
+
+    if (!normalizedFoodName || !normalizedFoodType || !normalizedUnit) return;
+
+    const options = loadOptionData();
+    options.associations = options.associations || {};
+    options.associations[normalizedFoodName] = {
+        type: normalizedFoodType,
+        unit: normalizedUnit
+    };
+
+    addUniqueOption(options.foodNames, normalizedFoodName);
+    addUniqueOption(options.foodTypes, normalizedFoodType);
+    addUniqueOption(options.units, normalizedUnit);
+
+    saveOptionData(options);
 };
 
 const resetFormEditingState = () => {
@@ -138,6 +176,30 @@ const populateDropdowns = () => {
     options.foodNames.forEach(name => addOptionToSelect(foodNameSelect, name));
     options.foodTypes.forEach(type => addOptionToSelect(foodTypeSelect, type));
     options.units.forEach(unit => addOptionToSelect(unitSelect, unit));
+
+    foodNameSelect.onchange = () => {
+        const selectedFoodName = foodNameSelect.value;
+
+        if (selectedFoodName === '__new') {
+            foodTypeSelect.value = '';
+            unitSelect.value = '';
+            return;
+        }
+
+        const association = selectedFoodName ? options.associations[selectedFoodName] : null;
+
+        if (association) {
+            foodTypeSelect.value = association.type;
+            unitSelect.value = association.unit;
+            foodTypeCustom.classList.add('hidden');
+            unitCustom.classList.add('hidden');
+            foodTypeCustom.value = '';
+            unitCustom.value = '';
+        } else {
+            foodTypeSelect.value = '';
+            unitSelect.value = '';
+        }
+    };
 };
 
 /**
@@ -363,6 +425,8 @@ const addFoodEntry = (event) => {
         foodData[selectedDateKey].push(newEntry);
     }
     saveFoodData(foodData);
+    rememberFoodAssociation(foodName, foodType, unit);
+
     // Refresh calendar markers to show days with entries
     // Ensure the calendar day element for this date shows the indicator immediately
     const dayEl = document.querySelector(`.calendar-day[data-date="${selectedDateKey}"]`);
@@ -412,7 +476,30 @@ const setupEventListeners = () => {
     prevMonthButton.addEventListener('click', goToPreviousMonth);
     todayButton.addEventListener('click', goToToday);
     nextMonthButton.addEventListener('click', goToNextMonth);
-    foodNameSelect.addEventListener('change', () => toggleCustomField(foodNameSelect, foodNameCustom));
+    foodNameSelect.addEventListener('change', () => {
+        toggleCustomField(foodNameSelect, foodNameCustom);
+
+        const selectedFoodName = foodNameSelect.value;
+        if (!selectedFoodName || selectedFoodName === '__new') {
+            foodTypeSelect.value = '';
+            unitSelect.value = '';
+            return;
+        }
+
+        const options = loadOptionData();
+        const association = options.associations[selectedFoodName];
+        if (association) {
+            foodTypeSelect.value = association.type;
+            unitSelect.value = association.unit;
+            foodTypeCustom.classList.add('hidden');
+            unitCustom.classList.add('hidden');
+            foodTypeCustom.value = '';
+            unitCustom.value = '';
+        } else {
+            foodTypeSelect.value = '';
+            unitSelect.value = '';
+        }
+    });
     foodTypeSelect.addEventListener('change', () => toggleCustomField(foodTypeSelect, foodTypeCustom));
     unitSelect.addEventListener('change', () => toggleCustomField(unitSelect, unitCustom));
     // Ensure calendar day clicks always open the log (works after re-render)
