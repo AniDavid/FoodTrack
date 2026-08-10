@@ -474,6 +474,11 @@ const setupEventListeners = () => {
     closeLogOverlayButton.addEventListener('click', () => {
         foodLoggingPanelEl.classList.remove('visible');
     });
+    foodLoggingPanelEl.addEventListener('click', (event) => {
+        if (event.target === foodLoggingPanelEl) {
+            foodLoggingPanelEl.classList.remove('visible');
+        }
+    });
     prevMonthButton.addEventListener('click', goToPreviousMonth);
     todayButton.addEventListener('click', goToToday);
     nextMonthButton.addEventListener('click', goToNextMonth);
