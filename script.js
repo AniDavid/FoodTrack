@@ -287,6 +287,7 @@ const goToPreviousMonth = () => {
 };
 
 const goToToday = () => {
+    selectedDateKey = '';
     renderCalendar(new Date());
 };
 
