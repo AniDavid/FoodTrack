@@ -1,3 +1,5 @@
+//claude --settings C:\Users\anida\.claude\lmstudio.setting.json
+
 //--- DOM Elements ---
 const calendarMonthEl = document.getElementById('calendar-month');
 const monthLabelEl = document.getElementById('calendar-month-label');
