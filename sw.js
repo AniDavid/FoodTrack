@@ -1,19 +1,21 @@
-const CACHE_NAME = 'food-track-v2026-08-11';
+const CACHE_NAME = 'food-track-v2026-08-17-02';
 const APP_SHELL = [
   './',
   './index.html',
   './style.css',
   './script.js',
+  './firebase-config.js',
+  './firebase-sync.js',
   './manifest.webmanifest',
   './instructions-hebrew.html',
   './FoodTrackIcon3D.png'
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
   );
 });
 
@@ -29,6 +31,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Network-First strategy: get latest deployed updates when online, fallback to cache when offline
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
@@ -36,24 +39,25 @@ self.addEventListener('fetch', (event) => {
   if (requestUrl.origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(event.request)
-        .then((networkResponse) => {
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-          return networkResponse;
-        })
-        .catch(() => {
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
           if (event.request.mode === 'navigate') {
             return caches.match('./index.html');
           }
           return Response.error();
         });
-    })
+      })
   );
 });
 

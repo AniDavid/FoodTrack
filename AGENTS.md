@@ -4,8 +4,10 @@
 Food Track is a **Hebrew-language food tracking PWA** that logs daily meals with calories. Uses vanilla JS + localStorage (no frameworks). Data persists across sessions on the user's device.
 
 ## Key Files
-- `index.html` – Main app UI (calendar, forms, modal)
-- `script.js` – All logic: calendar rendering, CRUD operations, localStorage persistence, PWA service worker
+- `index.html` – Main app UI (calendar, forms, modal, cloud sync modal)
+- `script.js` – App logic: calendar rendering, CRUD operations, localStorage persistence, sync UI controller
+- `firebase-config.js` – Firebase project configuration loader (reads from file or localStorage)
+- `firebase-sync.js` – Firebase v10 SDK integration: Google Auth, Cloud Firestore real-time sync, offline persistence, and conflict-free merge
 - `style.css` – RTL-first styling with purple theme (#9a84d9 background)
 - `manifest.webmanifest` – PWA configuration
 - `sw.js` – Service worker for offline support
@@ -123,9 +125,9 @@ This allows delete buttons to work on dynamically added entries without re-wirin
 
 ## Deployment & Versioning
 **Cache Busting** (required on every deploy):
-1. Update `CACHE_NAME` in `sw.js` → `'food-track-v' + new date` (currently: `'food-track-v2026-08-11'`)
-2. Update `manifest.webmanifest` → `id` and `start_url` version param (currently: `?v=2026-08-11`)
-3. Example: For release 2026-08-12, change all `2026-08-11` → `2026-08-12`
+1. Update `CACHE_NAME` in `sw.js` → `'food-track-v' + new date` (currently: `'food-track-v2026-08-16'`)
+2. Update `manifest.webmanifest` → `id` and `start_url` version param (currently: `?v=2026-08-16`)
+3. Example: For release 2026-08-16, change all `2026-08-11` → `2026-08-16`
 
 **Deployment:**
 - No build step required (vanilla JS)

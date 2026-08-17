@@ -54,12 +54,15 @@ const loadFoodData = () => {
 };
 
 /**
- * Saves the current state of food data to localStorage.
+ * Saves the current state of food data to localStorage and syncs to cloud if connected.
  * @param {Object} data The data object to save.
  */
 const saveFoodData = (data) => {
     try {
         localStorage.setItem('foodTrackerData', JSON.stringify(data));
+        if (window.FoodTrackSync && typeof window.FoodTrackSync.pushToCloud === 'function') {
+            window.FoodTrackSync.pushToCloud();
+        }
     } catch (e) {
         console.error("Error saving food data to local storage:", e);
     }
@@ -108,6 +111,9 @@ const saveOptionData = (data) => {
             associations: data.associations && typeof data.associations === 'object' ? data.associations : {}
         };
         localStorage.setItem('foodTrackerOptions', JSON.stringify(dataToSave));
+        if (window.FoodTrackSync && typeof window.FoodTrackSync.pushToCloud === 'function') {
+            window.FoodTrackSync.pushToCloud();
+        }
     } catch (e) {
         console.error("Error saving dropdown options to local storage:", e);
     }
@@ -578,13 +584,449 @@ const enterEditMode = (entryId) => {
     caloriesInput.value = typeof entry.calories === 'number' ? entry.calories : '';
 };
 
+// --- Cloud Auth & Backup UI Controller ---
+
+let isRegisterMode = false;
+
+/**
+ * Returns a friendly Hebrew error message for Firebase Auth errors.
+ * @param {Error} error 
+ * @returns {string}
+ */
+const getAuthErrorMessage = (error) => {
+    if (!error) return 'שגיאה לא ידועה, אנא נסה שוב.';
+    const code = error.code || '';
+    switch (code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+            return 'כתובת אימייל או סיסמה שגויים.';
+        case 'auth/email-already-in-use':
+            return 'כתובת אימייל זו כבר רשומה במערכת. אנא בחר בהתחברות.';
+        case 'auth/invalid-email':
+            return 'כתובת אימייל אינה תקינה.';
+        case 'auth/weak-password':
+            return 'הסיסמה קצרה מדי. נדרשים לפחות 6 תווים.';
+        case 'auth/network-request-failed':
+            return 'שגיאת רשת. אנא בדוק את החיבור לאינטרנט.';
+        case 'auth/configuration-not-found':
+        case 'auth/operation-not-allowed':
+            return 'שירות ההתחברות טרם הופעל ב-Firebase Console. יש להיכנס ל-Firebase Console > Authentication > Sign-in method ולהפעיל את Google ו/או Email/Password.';
+        case 'auth/popup-closed-by-user':
+            return 'חלון ההתחברות נסגר על ידי המשתמש.';
+        case 'auth/popup-blocked':
+            return 'הדפדפן חסם את חלון ההתחברות. אנא אפשר חלונות קופצים.';
+        default:
+            return error.message || 'ההתחברות נכשלה, אנא נסה שוב.';
+    }
+};
+
+/**
+ * Display or clear an error message in the login dialog.
+ * @param {string|null} message 
+ */
+const showAuthError = (message) => {
+    const errorEl = document.getElementById('auth-error-msg');
+    if (!errorEl) return;
+    if (message) {
+        errorEl.textContent = message;
+        errorEl.classList.remove('hidden');
+    } else {
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+    }
+};
+
+/**
+ * Open the login dialog modal.
+ */
+const openLoginModal = () => {
+    const modal = document.getElementById('login-modal');
+    if (modal) {
+        showAuthError(null);
+        modal.classList.remove('hidden');
+    }
+};
+
+/**
+ * Close the login dialog modal.
+ */
+const closeLoginModal = () => {
+    const modal = document.getElementById('login-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        showAuthError(null);
+    }
+};
+
+/**
+ * Updates the header auth state (user profile vs login button) and handles auto-login popup on launch.
+ * @param {Object} syncState 
+ */
+const updateAuthUI = (syncState = {}) => {
+    const user = syncState.user || (window.FoodTrackSync ? window.FoodTrackSync.getUser() : null);
+    const isAuthResolved = syncState.isAuthResolved || (window.FoodTrackSync && window.FoodTrackSync.isAuthResolved ? window.FoodTrackSync.isAuthResolved() : false);
+
+    const loggedInHeader = document.getElementById('auth-header-logged-in');
+    const loggedOutHeader = document.getElementById('auth-header-logged-out');
+    const headerUserName = document.getElementById('header-user-name');
+    const headerUserAvatar = document.getElementById('header-user-avatar');
+
+    if (user) {
+        // User is logged in
+        if (loggedInHeader) loggedInHeader.classList.remove('hidden');
+        if (loggedOutHeader) loggedOutHeader.classList.add('hidden');
+
+        const displayName = user.displayName || user.email?.split('@')[0] || 'משתמש';
+        if (headerUserName) {
+            headerUserName.textContent = displayName;
+        }
+
+        if (headerUserAvatar) {
+            if (user.photoURL) {
+                headerUserAvatar.innerHTML = `<img src="${user.photoURL}" alt="${displayName}">`;
+            } else {
+                const initial = displayName.charAt(0).toUpperCase();
+                headerUserAvatar.textContent = initial || '👤';
+            }
+        }
+
+        // Close login dialog if open
+        closeLoginModal();
+    } else {
+        // User is logged out
+        if (loggedInHeader) loggedInHeader.classList.add('hidden');
+        if (loggedOutHeader) loggedOutHeader.classList.remove('hidden');
+
+        // Check if we should pop up the login dialog on launch
+        const isGuest = sessionStorage.getItem('foodTrackGuestMode') === 'true';
+        if (isAuthResolved && !user && !isGuest) {
+            openLoginModal();
+        }
+    }
+};
+
+/**
+ * Switches the email card between Login and Register modes.
+ * @param {boolean} register 
+ */
+const setEmailAuthMode = (register) => {
+    isRegisterMode = register;
+    const tabLogin = document.getElementById('auth-tab-login');
+    const tabRegister = document.getElementById('auth-tab-register');
+    const nameField = document.getElementById('register-name-field');
+    const submitBtn = document.getElementById('email-submit-btn');
+
+    if (register) {
+        if (tabRegister) tabRegister.classList.add('active');
+        if (tabLogin) tabLogin.classList.remove('active');
+        if (nameField) nameField.classList.remove('hidden');
+        if (submitBtn) submitBtn.textContent = 'הרשמה וסנכרון';
+    } else {
+        if (tabLogin) tabLogin.classList.add('active');
+        if (tabRegister) tabRegister.classList.remove('active');
+        if (nameField) nameField.classList.add('hidden');
+        if (submitBtn) submitBtn.textContent = 'התחבר';
+    }
+    showAuthError(null);
+};
+
+/**
+ * Exports current food logs and options as a downloadable JSON file.
+ */
+const exportDataAsJSON = () => {
+    try {
+        const exportPayload = {
+            version: '1.0',
+            exportDate: new Date().toISOString(),
+            foodTrackerData: loadFoodData(),
+            foodTrackerOptions: loadOptionData()
+        };
+
+        const jsonStr = JSON.stringify(exportPayload, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const todayStr = formatDateKey(new Date());
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `food-track-backup-${todayStr}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error('Export failed:', e);
+        alert('שגיאה בייצוא הקובץ. אנא נסה שוב.');
+    }
+};
+
+/**
+ * Imports food logs and options from an uploaded JSON file.
+ * @param {File} file 
+ */
+const importDataFromJSON = (file) => {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const parsed = JSON.parse(e.target.result);
+            if (!parsed || typeof parsed !== 'object') {
+                throw new Error('קובץ לא תקין');
+            }
+
+            let incomingFoodData = {};
+            let incomingOptions = {};
+
+            if (parsed.foodTrackerData) {
+                incomingFoodData = parsed.foodTrackerData;
+                incomingOptions = parsed.foodTrackerOptions || {};
+            } else {
+                incomingFoodData = parsed;
+            }
+
+            const currentFoodData = loadFoodData();
+            const currentOptions = loadOptionData();
+
+            const mergedFoodData = { ...currentFoodData };
+            for (const [dateKey, entries] of Object.entries(incomingFoodData)) {
+                if (!Array.isArray(entries)) continue;
+                if (!mergedFoodData[dateKey]) {
+                    mergedFoodData[dateKey] = [...entries];
+                } else {
+                    const entryMap = new Map();
+                    mergedFoodData[dateKey].forEach(item => { if (item && item.id) entryMap.set(String(item.id), item); });
+                    entries.forEach(item => { if (item && item.id) entryMap.set(String(item.id), item); });
+                    mergedFoodData[dateKey] = Array.from(entryMap.values());
+                }
+            }
+
+            const mergedOptions = {
+                foodNames: Array.from(new Set([...currentOptions.foodNames, ...(incomingOptions.foodNames || [])])),
+                foodTypes: Array.from(new Set([...currentOptions.foodTypes, ...(incomingOptions.foodTypes || [])])),
+                units: Array.from(new Set([...currentOptions.units, ...(incomingOptions.units || [])])),
+                associations: { ...(currentOptions.associations || {}), ...(incomingOptions.associations || {}) }
+            };
+
+            saveFoodData(mergedFoodData);
+            saveOptionData(mergedOptions);
+
+            populateDropdowns();
+            renderCalendar(currentViewDate);
+            renderDailyLog();
+
+            alert('הנתונים שוחזרו בהצלחה!');
+            closeLoginModal();
+        } catch (err) {
+            console.error('Import error:', err);
+            alert('שגיאה בקריאת הקובץ. ודא שזהו קובץ גיבוי JSON תקין.');
+        }
+    };
+    reader.readAsText(file);
+};
+
+/**
+ * Setup event listeners for Authentication and Login Modal.
+ */
+const setupAuthListeners = () => {
+    const loginModal = document.getElementById('login-modal');
+    const closeLoginModalBtn = document.getElementById('close-login-modal');
+    const headerLoginBtn = document.getElementById('header-login-btn');
+    const headerLogoutBtn = document.getElementById('header-logout-btn');
+    const googleLoginBtn = document.getElementById('modal-google-login-btn');
+    const guestLoginBtn = document.getElementById('guest-login-btn');
+    const tabLoginBtn = document.getElementById('auth-tab-login');
+    const tabRegisterBtn = document.getElementById('auth-tab-register');
+    const emailAuthForm = document.getElementById('email-auth-form');
+    const exportJsonBtn = document.getElementById('export-json-button');
+    const importJsonInput = document.getElementById('import-json-file');
+
+    // Header Login button click
+    if (headerLoginBtn) {
+        headerLoginBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('foodTrackGuestMode');
+            openLoginModal();
+        });
+    }
+
+    // Header Logout (Sign Off) button click
+    if (headerLogoutBtn) {
+        headerLogoutBtn.addEventListener('click', async () => {
+            if (confirm('האם אתה בטוח שברצונך להתנתק?')) {
+                try {
+                    sessionStorage.removeItem('foodTrackGuestMode');
+                    if (window.FoodTrackSync && typeof window.FoodTrackSync.logout === 'function') {
+                        await window.FoodTrackSync.logout();
+                    }
+                    // Automatically popup login dialog on sign off
+                    openLoginModal();
+                } catch (e) {
+                    console.error('Logout error:', e);
+                }
+            }
+        });
+    }
+
+    // Close Modal Button
+    if (closeLoginModalBtn) {
+        closeLoginModalBtn.addEventListener('click', () => {
+            sessionStorage.setItem('foodTrackGuestMode', 'true');
+            closeLoginModal();
+        });
+    }
+
+    // Guest Mode Button
+    if (guestLoginBtn) {
+        guestLoginBtn.addEventListener('click', () => {
+            sessionStorage.setItem('foodTrackGuestMode', 'true');
+            closeLoginModal();
+        });
+    }
+
+    // Dismiss by clicking outside modal sheet
+    if (loginModal) {
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                sessionStorage.setItem('foodTrackGuestMode', 'true');
+                closeLoginModal();
+            }
+        });
+    }
+
+    // Google Sign-In button
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', async () => {
+            try {
+                showAuthError(null);
+                if (!window.FoodTrackSync) {
+                    showAuthError('שירות הסנכרון נטען כעת, אנא נסה שוב בעוד מספר שניות.');
+                    return;
+                }
+                googleLoginBtn.disabled = true;
+                googleLoginBtn.style.opacity = '0.7';
+                await window.FoodTrackSync.loginWithGoogle();
+                sessionStorage.removeItem('foodTrackGuestMode');
+                closeLoginModal();
+            } catch (err) {
+                console.error('Google login error:', err);
+                if (err.code !== 'auth/popup-closed-by-user') {
+                    showAuthError(getAuthErrorMessage(err));
+                }
+            } finally {
+                if (googleLoginBtn) {
+                    googleLoginBtn.disabled = false;
+                    googleLoginBtn.style.opacity = '1';
+                }
+            }
+        });
+    }
+
+    // Tabs for Email Login vs Register
+    if (tabLoginBtn) {
+        tabLoginBtn.addEventListener('click', () => setEmailAuthMode(false));
+    }
+    if (tabRegisterBtn) {
+        tabRegisterBtn.addEventListener('click', () => setEmailAuthMode(true));
+    }
+
+    // Email & Password Form Submit
+    if (emailAuthForm) {
+        emailAuthForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showAuthError(null);
+
+            const email = (document.getElementById('auth-email')?.value || '').trim();
+            const password = document.getElementById('auth-password')?.value || '';
+            const displayName = (document.getElementById('auth-display-name')?.value || '').trim();
+            const submitBtn = document.getElementById('email-submit-btn');
+
+            if (!email || !password) {
+                showAuthError('אנא הזן כתובת אימייל וסיסמה.');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthError('הסיסמה חייבת לכלול לפחות 6 תווים.');
+                return;
+            }
+
+            try {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'מתחבר...';
+                }
+
+                if (isRegisterMode) {
+                    await window.FoodTrackSync.registerWithEmail(email, password, displayName);
+                } else {
+                    await window.FoodTrackSync.loginWithEmail(email, password);
+                }
+
+                sessionStorage.removeItem('foodTrackGuestMode');
+                emailAuthForm.reset();
+                closeLoginModal();
+            } catch (err) {
+                console.error('Email auth error:', err);
+                showAuthError(getAuthErrorMessage(err));
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = isRegisterMode ? 'הרשמה וסנכרון' : 'התחבר';
+                }
+            }
+        });
+    }
+
+    // Export & Import backup JSON
+    if (exportJsonBtn) {
+        exportJsonBtn.addEventListener('click', exportDataAsJSON);
+    }
+    if (importJsonInput) {
+        importJsonInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (file) {
+                importDataFromJSON(file);
+                importJsonInput.value = '';
+            }
+        });
+    }
+};
+
 /**
  * Initialization function run when the page loads.
  */
-
 document.addEventListener('DOMContentLoaded', () => {
     populateDropdowns();
     setupEventListeners();
+    setupAuthListeners();
+
     // Initial calendar render using today's date
     renderCalendar(new Date());
-});
+
+    // Listen for real-time cloud data updates from Firestore
+    window.addEventListener('foodTrack:cloudDataUpdated', () => {
+        populateDropdowns();
+        renderCalendar(currentViewDate);
+        renderDailyLog();
+    });
+
+    // Listen for sync/auth status changes
+    window.addEventListener('foodTrack:syncStatusChanged', (e) => {
+        updateAuthUI(e.detail);
+    });
+
+    // Listen for auth resolution event on launch
+    window.addEventListener('foodTrack:authResolved', (e) => {
+        updateAuthUI({ user: e.detail?.user, isAuthResolved: true });
+    });
+
+    // Initial auth UI check
+    if (window.FoodTrackSync && typeof window.FoodTrackSync.whenAuthReady === 'function') {
+        window.FoodTrackSync.whenAuthReady().then((user) => {
+            updateAuthUI({ user, isAuthResolved: true });
+        });
+    } else {
+        updateAuthUI();
+    }
+});

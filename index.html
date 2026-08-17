@@ -10,11 +10,40 @@
     <meta name="apple-mobile-web-app-title" content="Food Track">
     <link rel="apple-touch-icon" href="FoodTrackIcon3D.png">
     <link rel="icon" type="image/png" href="FoodTrackIcon3D.png">
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.webmanifest?v=2026-08-17-02">
+    <link rel="stylesheet" href="style.css?v=2026-08-17-02">
 </head>
 <body dir="rtl">
-    <h1 dir="ltr" class="app-title"><img src="FoodTrackIcon3D.png" alt="Food Track icon" class="app-title-icon">Food Track</h1>
+    <header class="app-header">
+        <div class="header-content">
+            <h1 dir="ltr" class="app-title">
+                <img src="FoodTrackIcon3D.png" alt="Food Track icon" class="app-title-icon">Food Track
+            </h1>
+            
+            <!-- Header User & Auth Controls -->
+            <div class="header-auth-container">
+                <!-- Logged In State: Unified User Avatar, Name and Disconnect Button -->
+                <div id="auth-header-logged-in" class="auth-header-pill hidden">
+                    <button id="header-user-btn" class="header-user-unified-btn" type="button" title="לחץ כדי להתנתק מחשבון הענן">
+                        <div id="header-user-avatar" class="header-user-avatar">👤</div>
+                        <span id="header-user-name" class="header-user-name"></span>
+                        <span class="user-action-tag">
+                            <span>התנתק</span>
+                            <span class="logout-icon">🚪</span>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Logged Out State: Sign in button -->
+                <div id="auth-header-logged-out" class="auth-header-pill">
+                    <button id="header-login-btn" class="header-login-btn" type="button">
+                        <span>התחבר לחשבון</span>
+                        <span class="login-icon">🔑</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
 
     <div class="container">
         <!-- Calendar View -->
@@ -82,6 +111,92 @@
                 </ul>
             </div>
         </section>
+
+        <!-- Login & Account Selection Dialog Modal -->
+        <section id="login-modal" class="sync-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+            <div class="sync-modal-sheet auth-modal-sheet">
+                <div class="sheet-handle"></div>
+                <button id="close-login-modal" class="close-button" aria-label="סגור">×</button>
+                
+                <div class="auth-modal-header">
+                    <div class="auth-modal-icon-wrapper">
+                        <img src="FoodTrackIcon3D.png" alt="Food Track" class="auth-modal-logo">
+                    </div>
+                    <h2 id="login-modal-title" class="auth-modal-title">התחברות ל-Food Track</h2>
+                    <p class="auth-modal-subtitle">סנכרן ושמור את יומן הארוחות שלך בענן בזמן אמת</p>
+                </div>
+
+                <!-- Error feedback banner -->
+                <div id="auth-error-msg" class="auth-error-banner hidden" role="alert"></div>
+
+                <!-- Login Methods -->
+                <div class="auth-methods-container">
+                    <!-- Method 1: Google Login (Primary) -->
+                    <button id="modal-google-login-btn" type="button" class="google-signin-btn">
+                        <svg class="google-icon" viewBox="0 0 24 24" width="22" height="22">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>התחברות מהירה עם Google</span>
+                    </button>
+
+                    <div class="auth-divider">
+                        <span>או</span>
+                    </div>
+
+                    <!-- Method 2: Email & Password Form -->
+                    <div class="auth-email-card">
+                        <div class="auth-tab-buttons">
+                            <button id="auth-tab-login" type="button" class="auth-tab active">התחברות במייל</button>
+                            <button id="auth-tab-register" type="button" class="auth-tab">הרשמה חדשה</button>
+                        </div>
+
+                        <form id="email-auth-form" class="auth-email-form">
+                            <div id="register-name-field" class="auth-input-group hidden">
+                                <label for="auth-display-name">שם משתמש:</label>
+                                <input type="text" id="auth-display-name" placeholder="למשל: דניאל" autocomplete="name">
+                            </div>
+                            
+                            <div class="auth-input-group">
+                                <label for="auth-email">כתובת אימייל: <span class="required-marker">*</span></label>
+                                <input type="email" id="auth-email" placeholder="name@example.com" required autocomplete="email" dir="ltr">
+                            </div>
+
+                            <div class="auth-input-group">
+                                <label for="auth-password">סיסמה: <span class="required-marker">*</span></label>
+                                <input type="password" id="auth-password" placeholder="לפחות 6 תווים" required minlength="6" autocomplete="current-password" dir="ltr">
+                            </div>
+
+                            <button id="email-submit-btn" type="submit" class="primary-button auth-submit-btn">התחבר</button>
+                        </form>
+                    </div>
+
+                    <!-- Method 3: Continue as Guest / Offline -->
+                    <div class="auth-guest-section">
+                        <button id="guest-login-btn" type="button" class="guest-mode-btn">
+                            <span>המשך כאורח (שימוש מקומי במכשיר)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Collapsible Settings & Backup -->
+                <details id="advanced-settings-details" class="sync-details-accordion">
+                    <summary>⚙️ גיבוי מקומי והגדרות</summary>
+                    <div class="config-inner-form">
+                        <p class="config-hint">ניתן לייצא או לשחזר קובץ גיבוי ידני (JSON):</p>
+                        <div class="backup-actions">
+                            <button id="export-json-button" type="button" class="secondary-button btn-small">⬇️ ייצוא קובץ גיבוי</button>
+                            <label class="secondary-button btn-small file-upload-label">
+                                ⬆️ שחזור מקובץ
+                                <input type="file" id="import-json-file" accept=".json" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </section>
     </div>
 
     <footer>
@@ -89,26 +204,27 @@
         <p><a href="instructions-hebrew.html" style="color:#2e7d32;">מדריך התקנה ושימוש</a></p>
     </footer>
 
-    <script src="script.js"></script>
+    <script type="module" src="firebase-sync.js?v=2026-08-17-02"></script>
+    <script src="script.js?v=2026-08-17-02"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', async () => {
                 try {
-                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    const registration = await navigator.serviceWorker.register('./sw.js?v=2026-08-17-02');
 
-                    registration.addEventListener('updatefound', () => {
-                        const installingWorker = registration.installing;
-                        if (!installingWorker) return;
-
-                        installingWorker.addEventListener('statechange', () => {
-                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                const shouldReload = window.confirm('עדכון אפליקציה זמין. לטעון מחדש עכשיו?');
-                                if (shouldReload) {
-                                    window.location.reload();
-                                }
-                            }
-                        });
+                    // If a new service worker activated and took control, refresh once to show latest code
+                    let refreshing = false;
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        if (!refreshing) {
+                            refreshing = true;
+                            window.location.reload();
+                        }
                     });
+
+                    // Force check for updates
+                    if (registration && typeof registration.update === 'function') {
+                        registration.update();
+                    }
                 } catch (error) {
                     console.error('Service worker registration failed:', error);
                 }

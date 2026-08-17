@@ -23,26 +23,145 @@ body {
     border-radius: 18px;
 }
 
+.app-header {
+    max-width: 1200px;
+    margin: 10px auto 0;
+    padding: 6px 14px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
 h1 {
     color: #9a84d9;
-    margin-bottom: 12px;
+    margin-bottom: 0;
 }
 
 .app-title {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
-    width: max-content;
-    margin: 0 auto 12px;
-    font-size: 1.6rem;
+    margin: 0;
+    font-size: 1.5rem;
 }
 
 .app-title-icon {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 10px;
     object-fit: cover;
+}
+
+/* Header User & Auth Bar */
+.header-auth-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.auth-header-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-pill-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e7ddff;
+    padding: 4px 12px 4px 8px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(154, 132, 217, 0.1);
+}
+
+.header-user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #b39ae8 0%, #9a84d9 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: bold;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.header-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.header-user-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #4a3c6d;
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.header-logout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff5f5;
+    border: 1px solid #fed7d7;
+    color: #e53e3e;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 4px rgba(229, 62, 62, 0.08);
+}
+
+.header-logout-btn:hover {
+    background: #fee2e2;
+    border-color: #feb2b2;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(229, 62, 62, 0.15);
+}
+
+.header-logout-btn:active {
+    transform: scale(0.97);
+}
+
+.header-login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #9a84d9 0%, #856ec8 100%);
+    border: none;
+    color: #ffffff;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(154, 132, 217, 0.28);
+    transition: all 0.2s ease;
+}
+
+.header-login-btn:hover {
+    background: linear-gradient(135deg, #8a73cd 0%, #765ebb 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(154, 132, 217, 0.38);
+}
+
+.header-login-btn:active {
+    transform: scale(0.97);
 }
 
 /* --- Sections & Layout -- */
@@ -184,43 +303,55 @@ h2 {
 }
 
 .calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #faf8fd;
+    border: 1px solid #ede8f5;
     cursor: pointer;
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    padding: 8px 0;
-    font-size: 15px;
-    min-height: 42px;
-    transition: background-color 0.2s, transform 0.1s;
+    font-size: 0.92rem;
+    position: relative;
+    transition: all 0.18s ease;
 }
 
 .calendar-day:hover {
-    background-color: #f1ebff; /* Light purple hover */
-    transform: translateY(-1px);
-} 
+    background: #f1ebfa;
+    border-color: #b39ae8;
+}
 
-/* Active day styling */
-.calendar-day.active { 
-    background-color: #b39ae8; 
-    color: white;
+.calendar-day.selected {
+    background: #9a84d9 !important;
+    color: #ffffff !important;
     font-weight: bold;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(125, 102, 176, 0.16);
+    box-shadow: 0 4px 10px rgba(154, 132, 217, 0.35);
 }
 
-/* Indicator for days that already have logged entries */
 .calendar-day.has-entries {
-    position: relative;
+    border-color: #9a84d9;
+    font-weight: 600;
 }
+
 .calendar-day.has-entries::after {
     content: '';
-    position: absolute;
-    right: 6px;
-    bottom: 6px;
-    width: 8px;
-    height: 8px;
+    width: 5px;
+    height: 5px;
+    background: #9a84d9;
     border-radius: 50%;
-    background: #dacdff; /* soft accent dot */
-    box-shadow: 0 0 0 3px rgba(179,154,232,0.12);
+    position: absolute;
+    bottom: 3px;
+}
+
+.calendar-day.selected.has-entries::after {
+    background: #ffffff;
+}
+
+.calendar-day.empty {
+    background: transparent;
+    border-color: transparent;
+    cursor: default;
 }
 
 /* --- Form Styling -- */
@@ -234,12 +365,6 @@ h2 {
     font-size: 0.95rem;
 }
 
-.form-note {
-    margin-bottom: 6px;
-    color: #666;
-    font-size: 0.9rem;
-}
-
 .required-marker {
     color: #d32f2f;
     font-weight: bold;
@@ -248,6 +373,8 @@ h2 {
 
 #food-entry-form input[type="text"],
 #food-entry-form input[type="number"],
+#food-entry-form input[type="email"],
+#food-entry-form input[type="password"],
 #food-entry-form select {
     width: 100%;
     padding: 8px 10px;
@@ -262,21 +389,38 @@ h2 {
     display: none !important;
 }
 
-#add-food-button {
+#add-food-button, .primary-button {
     background: linear-gradient(180deg, #b39ae8 0%, #9a84d9 100%);
     color: white;
     padding: 11px 18px;
     border: none;
     border-radius: 12px;
     cursor: pointer;
-    margin-top: 14px;
     font-size: 15px;
-    transition: background-color 0.3s;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.15s;
     box-shadow: 0 8px 18px rgba(179,154,232,0.28);
 }
 
-#add-food-button:hover {
+#add-food-button:hover, .primary-button:hover {
     background: linear-gradient(180deg, #a98fe3 0%, #8e79d0 100%);
+    transform: translateY(-1px);
+}
+
+.secondary-button {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.15s;
+    font-size: 15px;
+}
+
+.secondary-button:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-1px);
 }
 
 /* --- Daily Log List Styling -- */
@@ -337,27 +481,6 @@ h2 {
     line-height: 1;
 }
 
-.secondary-button {
-    background-color: #f0f0f0;
-    color: #333;
-    margin-top: 10px;
-    border: 1px solid #ccc;
-    padding: 10px 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s, transform 0.2s;
-    font-size: 15px;
-}
-
-.secondary-button:hover {
-    background-color: #e0e0e0;
-    transform: translateY(-1px);
-}
-
-.secondary-button:active {
-    transform: scale(0.98);
-}
-
 .delete-entry:hover {
     background-color: #e53935;
     transform: translateY(-1px);
@@ -379,10 +502,374 @@ h2 {
     }
 }
 
+/* --- Daily Log Overlay Panel --- */
+#food-logging-panel {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(54, 45, 77, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 900;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+#food-logging-panel.open {
+    display: flex;
+}
+
+.food-log-modal {
+    width: 100%;
+    max-width: 520px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background-color: #ffffff;
+    border-radius: 24px 24px 0 0;
+    padding: 16px 20px 24px;
+    box-shadow: 0 -12px 35px rgba(125, 102, 176, 0.22);
+    position: relative;
+    animation: slide-up-modal 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sheet-handle {
+    width: 42px;
+    height: 5px;
+    background-color: #ded6ed;
+    border-radius: 999px;
+    margin: 0 auto 12px;
+}
+
+.close-button {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    background: #f4effa;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    line-height: 1;
+    color: #6a5a87;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.close-button:hover {
+    background: #e6dbf5;
+    color: #3b2a59;
+}
+
+.calories-summary {
+    font-size: 1.05rem;
+    font-weight: bold;
+    color: #7b62b3;
+    margin: 6px 0 12px;
+}
+
+/* --- Auth & Login Modal Styling --- */
+.sync-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(43, 34, 64, 0.55);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transition: opacity 0.25s ease;
+}
+
+.sync-modal-backdrop.hidden {
+    display: none !important;
+}
+
+.sync-modal-sheet {
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background-color: #ffffff;
+    border-radius: 24px 24px 0 0;
+    padding: 18px 20px 24px;
+    box-shadow: 0 -12px 35px rgba(125, 102, 176, 0.25);
+    direction: rtl;
+    text-align: right;
+    position: relative;
+    animation: slide-up-modal 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-modal-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-modal-icon-wrapper {
+    margin-bottom: 8px;
+}
+
+.auth-modal-logo {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(154, 132, 217, 0.3);
+}
+
+.auth-modal-title {
+    font-size: 1.35rem;
+    color: #3f305c;
+    margin: 4px 0;
+    font-weight: 800;
+}
+
+.auth-modal-subtitle {
+    font-size: 0.9rem;
+    color: #6f628c;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Error feedback banner */
+.auth-error-banner {
+    background-color: #fff2f2;
+    border: 1px solid #ffd4d4;
+    color: #d32f2f;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.35;
+}
+
+.auth-methods-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.google-signin-btn {
+    width: 100%;
+    background: #ffffff;
+    border: 1.5px solid #d2c8ea;
+    color: #3c4043;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 12px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(125, 102, 176, 0.09);
+    transition: all 0.2s ease;
+}
+
+.google-signin-btn:hover {
+    background-color: #faf8ff;
+    border-color: #9a84d9;
+    box-shadow: 0 4px 14px rgba(154, 132, 217, 0.2);
+    transform: translateY(-1px);
+}
+
+.google-signin-btn:active {
+    transform: scale(0.99);
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #948aa8;
+    font-size: 0.85rem;
+    margin: 2px 0;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ede8f5;
+}
+
+.auth-divider span {
+    padding: 0 10px;
+}
+
+/* Email Card & Form */
+.auth-email-card {
+    background: #fbf9fe;
+    border: 1px solid #ede7f8;
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.auth-tab-buttons {
+    display: flex;
+    border-bottom: 1px solid #e4daf4;
+    margin-bottom: 12px;
+    gap: 4px;
+}
+
+.auth-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #7a6e93;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.18s ease;
+}
+
+.auth-tab.active {
+    color: #7b59bf;
+    border-bottom-color: #9a84d9;
+}
+
+.auth-email-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.auth-input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #5d4d7a;
+    margin-bottom: 4px;
+}
+
+.auth-input-group input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #ddd2f0;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    background: #ffffff;
+    box-sizing: border-box;
+}
+
+.auth-submit-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px;
+    font-size: 0.95rem;
+}
+
+/* Guest Button */
+.guest-mode-btn {
+    width: 100%;
+    background: transparent;
+    border: 1.5px dashed #cfc5e6;
+    color: #6a5a87;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.guest-mode-btn:hover {
+    background: #f6f2fc;
+    border-color: #9a84d9;
+    color: #433360;
+}
+
+/* Details and Accordion */
+.sync-details-accordion {
+    border-top: 1px solid #ede8f5;
+    padding-top: 10px;
+    margin-top: 12px;
+}
+
+.sync-details-accordion summary {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #76659c;
+    cursor: pointer;
+    padding: 4px 0;
+    user-select: none;
+}
+
+.config-inner-form {
+    padding: 8px 0 4px;
+}
+
+.config-hint {
+    font-size: 0.82rem;
+    color: #666;
+    margin-bottom: 8px;
+    line-height: 1.35;
+}
+
+.backup-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    margin-top: 0 !important;
+    cursor: pointer;
+}
+
+.file-upload-label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    margin-top: 0 !important;
+}
+
+@keyframes slide-up-modal {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+/* Desktop layout for modal */
+@media (min-width: 600px) {
+    .sync-modal-backdrop {
+        align-items: center;
+    }
+
+    .sync-modal-sheet {
+        border-radius: 20px;
+        max-height: 85vh;
+        animation: fade-in-modal 0.2s ease;
+    }
+
+    @keyframes fade-in-modal {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+}
+
 /* --- Footer & Utility -- */
 footer {
     text-align: center;
-    padding: 10px;
+    padding: 16px 10px;
     color: #777;
     font-size: 0.9em;
 }
